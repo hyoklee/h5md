@@ -41,9 +41,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install pytest pytest-cov
-        # Install markitdown from GitHub
-        python -m pip install git+https://github.com/microsoft/markitdown.git@main
-        # Install package in editable mode
         python -m pip install -e .
 
     - name: Run tests with pytest
@@ -75,9 +72,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install flake8 black isort mypy
-        # Install markitdown from GitHub
-        python -m pip install git+https://github.com/microsoft/markitdown.git@main
-        # Install package in editable mode
         python -m pip install -e .
 
     - name: Check formatting with black
@@ -110,8 +104,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install build twine
-        # Install markitdown from GitHub for build verification
-        python -m pip install git+https://github.com/microsoft/markitdown.git@main
 
     - name: Build package
       run: python -m build
