@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "h5py>=3.0.0",
-        "markitdown>=0.1.0",
+        "markitdown @ git+https://github.com/microsoft/markitdown.git@main",
         "numpy>=1.19.0",
     ],
     entry_points={
