@@ -16,7 +16,7 @@ def main():
         output_path = args.input.rsplit('.', 1)[0] + '.md'
     
     # Convert file
-    md = MarkItDown()
+    md = MarkItDown(enable_plugins=True)  # Enable plugins to use our HDF5 plugin
     result = md.convert(args.input)
     
     # Write output

@@ -31,23 +31,25 @@ def test_plugin_initialization():
     assert plugin.name == "hdf5"
     assert plugin.description == "Plugin for visualizing HDF5 metadata"
 
-def test_plugin_can_handle():
+def test_plugin_can_convert():
     plugin = HDF5Plugin()
-    assert plugin.can_handle('test.h5') is True
-    assert plugin.can_handle('test.hdf5') is True
-    assert plugin.can_handle('test.txt') is False
+    assert plugin.can_convert('test.h5') is True
+    assert plugin.can_convert('test.hdf5') is True
+    assert plugin.can_convert('test.txt') is False
 
-def test_plugin_process_file(sample_hdf5_file):
+def test_plugin_convert(sample_hdf5_file):
     plugin = HDF5Plugin()
-    md = MarkItDown()
-    result = md.convert(str(sample_hdf5_file))
+    md = MarkItDown(enable_plugins=True)  # Enable plugins to use our HDF5 plugin
+    builder = md._builder
+    plugin.convert(str(sample_hdf5_file), builder)
+    result = builder.build()
     
     # Check for expected content
-    assert "Test HDF5 file" in result.text_content
-    assert "data" in result.text_content
-    assert "array" in result.text_content
-    assert "matrix" in result.text_content
-    assert "meters" in result.text_content
+    assert "Test HDF5 file" in result
+    assert "data" in result
+    assert "array" in result
+    assert "matrix" in result
+    assert "meters" in result
 
 def test_cli_basic(sample_hdf5_file):
     from markitdown_hdf5.cli import main
