@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "h5py>=3.0.0",
-        "markitdown",
+        "markitdown>0.0.1",
         "numpy>=1.19.0",
     ],
     entry_points={
@@ -32,12 +32,10 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Topic :: Scientific/Engineering",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     include_package_data=True,
 )
