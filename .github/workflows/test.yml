@@ -26,38 +26,25 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
-    - name: Set up Conda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        auto-activate-base: false
-        python-version: ${{ matrix.python-version }}
-        channels: conda-forge,defaults
-
     - name: Install dependencies (Linux)
       if: runner.os == 'Linux'
-      shell: bash -l {0}
       run: |
         sudo apt-get update
         sudo apt-get install -y libhdf5-dev
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
-      shell: bash -l {0}
       run: |
         brew install hdf5
 
-    - name: Create conda environment
-      shell: bash -l {0}
+    - name: Install Python dependencies
       run: |
-        conda env create -f environment.yml
-        conda activate markitdown-hdf5-dev
-        pip install -e .
-        pip install pytest pytest-cov
+        python -m pip install --upgrade pip
+        python -m pip install pytest pytest-cov
+        python -m pip install -e .
 
     - name: Run tests with pytest
-      shell: bash -l {0}
       run: |
-        conda activate markitdown-hdf5-dev
         pytest tests/ --cov=markitdown_hdf5 --cov-report=xml
 
     - name: Upload coverage to Codecov
@@ -84,7 +71,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 black isort mypy
+        python -m pip install flake8 black isort mypy
+        python -m pip install -e .
 
     - name: Check formatting with black
       run: black --check .
@@ -115,7 +103,7 @@ jobs:
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build twine
+        python -m pip install build twine
 
     - name: Build package
       run: python -m build
