@@ -1,0 +1,7 @@
+include LICENSE
+include README.md
+include meta.yaml
+include conda_build_config.yaml
+recursive-include tests *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[cod]

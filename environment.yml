@@ -1,0 +1,16 @@
+name: markitdown-hdf5-dev
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.7
+  - h5py>=3.0.0
+  - numpy>=1.19.0
+  - pip
+  - conda-build
+  - pytest
+  - pytest-cov
+  - black
+  - flake8
+  - pip:
+    - markitdown>=0.1.0

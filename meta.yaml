@@ -1,0 +1,48 @@
+{% set name = "markitdown-hdf5" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  path: .
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+    - setuptools
+  run:
+    - python >=3.7
+    - h5py >=3.0.0
+    - numpy >=1.19.0
+    - markitdown >=0.1.0
+
+test:
+  imports:
+    - markitdown_hdf5
+  requires:
+    - pytest
+  commands:
+    - python -c "import markitdown_hdf5"
+
+about:
+  home: https://github.com/microsoft/markitdown
+  license: MIT
+  license_family: MIT
+  summary: A Markitdown plugin for HDF5 metadata visualization
+  description: |
+    A plugin for Markitdown that provides rich visualization of HDF5 file metadata,
+    including group structure, dataset information, and attributes in markdown format.
+  doc_url: https://github.com/microsoft/markitdown
+  dev_url: https://github.com/microsoft/markitdown
+
+extra:
+  recipe-maintainers:
+    - your-github-username
