@@ -3,7 +3,7 @@ import h5py
 import numpy as np
 import pytest
 from markitdown_hdf5 import HDF5Plugin
-from markitdown import MarkdownBuilder
+from markitdown import MarkItDown
 
 @pytest.fixture
 def sample_hdf5_file(tmp_path):
@@ -39,17 +39,15 @@ def test_plugin_can_handle():
 
 def test_plugin_process_file(sample_hdf5_file):
     plugin = HDF5Plugin()
-    builder = MarkdownBuilder()
-    
-    plugin.process_file(str(sample_hdf5_file), builder)
-    output = builder.build()
+    md = MarkItDown()
+    result = md.convert(str(sample_hdf5_file))
     
     # Check for expected content
-    assert "Test HDF5 file" in output
-    assert "data" in output
-    assert "array" in output
-    assert "matrix" in output
-    assert "meters" in output
+    assert "Test HDF5 file" in result.text_content
+    assert "data" in result.text_content
+    assert "array" in result.text_content
+    assert "matrix" in result.text_content
+    assert "meters" in result.text_content
 
 def test_cli_basic(sample_hdf5_file):
     from markitdown_hdf5.cli import main
