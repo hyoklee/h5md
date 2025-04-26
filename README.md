@@ -8,6 +8,11 @@ A plugin for [Markitdown](https://github.com/microsoft/markitdown/) that provide
 - Data validation
 - File comparison
 
+## Requirements
+
+- Python 3.8 or higher
+- HDF5 libraries (installed automatically on most systems)
+
 ## Installation
 
 ```bash
