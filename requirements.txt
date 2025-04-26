@@ -1,5 +1,5 @@
 h5py>=3.0.0
-markitdown>0.0.1
+markitdown
 numpy>=1.19.0
 plotly>=5.13.0
 pandas>=1.5.0
