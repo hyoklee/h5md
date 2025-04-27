@@ -138,4 +138,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Build conda
-      run: conda-build .
+      run: |
+        conda install -y conda-build
+        conda install -y conda-verify
+        conda install -y anaconda-client
+        conda-build .
