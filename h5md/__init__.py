@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 import h5py
 import numpy as np
@@ -7,6 +7,7 @@ import numpy as np
 class HDF5Converter:
     """Convert HDF5 files to markdown format."""
 
+    _output_lines: List[str]
     def __init__(self) -> None:
         self._output_lines = []
 
