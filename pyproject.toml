@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "wheel", "build>=0.10.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "markitdown-hdf5"
+name = "h5md"
 version = "0.1.0"
 description = "A Markitdown plugin for HDF5 metadata visualization"
 readme = "README.md"
@@ -53,10 +53,10 @@ Repository = "https://github.com/microsoft/markitdown.git"
 Issues = "https://github.com/microsoft/markitdown/issues"
 
 [project.scripts]
-h5md = "markitdown_hdf5.cli:main"
+h5md = "h5md.cli:main"
 
 [project.entry-points."markitdown.plugins"]
-hdf5 = "markitdown_hdf5:register"
+hdf5 = "h5md:register"
 
 [tool.black]
 line-length = 88
@@ -84,7 +84,7 @@ warn_unreachable = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --cov=markitdown_hdf5 --cov-report=xml"
+addopts = "-ra -q --cov=h5md --cov-report=xml"
 testpaths = [
     "tests",
 ]

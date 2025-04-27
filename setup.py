@@ -4,23 +4,19 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="markitdown-hdf5",
+    name="h5md",
     version="0.1.0",
-    description="A plugin for markitdown to convert HDF5 files to markdown",
-    author="H. Joe Lee",
-    author_email="hyoklee@hdfgroup.org",
+    description="A command-line tool to convert HDF5 files to markdown",
+    author="Joe Lee",
+    author_email="joe@example.com",
     packages=find_packages(),
     install_requires=[
-        "markitdown>0.0.1",
         "h5py>=3.0.0",
         "numpy>=1.20.0",
     ],
     entry_points={
         'console_scripts': [
-            'h5md=markitdown_hdf5.cli:main',
-        ],
-        "markitdown.plugins": [
-            "hdf5 = markitdown_hdf5:register"
+            'h5md=h5md.cli:main',
         ],
     },
     long_description=long_description,
@@ -28,7 +24,7 @@ setup(
     url="https://github.com/microsoft/markitdown",
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",

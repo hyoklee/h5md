@@ -2,8 +2,8 @@ import os
 import h5py
 import numpy as np
 import pytest
-from markitdown_hdf5 import HDF5Plugin
-from markitdown import MarkItDown
+from h5md import register
+from h5md import HDF5Converter
 
 @pytest.fixture
 def sample_hdf5_file(tmp_path):
@@ -26,23 +26,9 @@ def sample_hdf5_file(tmp_path):
     
     return file_path
 
-def test_plugin_initialization():
-    plugin = HDF5Plugin()
-    assert plugin.name == "hdf5"
-    assert plugin.description == "Plugin for visualizing HDF5 metadata"
-
-def test_plugin_can_convert():
-    plugin = HDF5Plugin()
-    assert plugin.can_convert('test.h5') is True
-    assert plugin.can_convert('test.hdf5') is True
-    assert plugin.can_convert('test.txt') is False
-
-def test_plugin_convert(sample_hdf5_file):
-    plugin = HDF5Plugin()
-    md = MarkItDown(enable_plugins=True)  # Enable plugins to use our HDF5 plugin
-    builder = md._builder
-    plugin.convert(str(sample_hdf5_file), builder)
-    result = builder.build()
+def test_hdf5_conversion(sample_hdf5_file):
+    converter = HDF5Converter()
+    result = converter.convert(str(sample_hdf5_file))
     
     # Check for expected content
     assert "Test HDF5 file" in result
@@ -52,7 +38,7 @@ def test_plugin_convert(sample_hdf5_file):
     assert "meters" in result
 
 def test_cli_basic(sample_hdf5_file):
-    from markitdown_hdf5.cli import main
+    from h5md.cli import main
     import sys
     
     # Prepare command line arguments

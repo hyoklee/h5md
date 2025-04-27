@@ -1,117 +1,91 @@
-# Markitdown HDF5 Plugin
+# HDF5 to Markdown Converter
 
-A plugin for [Markitdown](https://github.com/microsoft/markitdown/) that provides rich visualization of HDF5 file metadata, including:
-- Complete group hierarchy
-- Dataset information (shape, type, statistics)
-- Attributes for both groups and datasets
-- Interactive visualizations
-- Data validation
-- File comparison
+A simple command-line tool to convert HDF5 files to markdown format. This tool helps you visualize the structure, metadata, and attributes of HDF5 files in a human-readable markdown format.
 
-## Requirements
+## Features
 
-- Python 3.8 or higher
-- HDF5 libraries (installed automatically on most systems)
+- Convert HDF5 files to markdown format
+- Display file structure including groups and datasets
+- Show dataset properties (shape, type)
+- List attributes for groups and datasets
+- Clean and readable markdown output
 
 ## Installation
 
 ```bash
-pip install .
+pip install hdf5-to-markdown
 ```
 
 ## Usage
 
-### Basic Usage
+### Command Line
 
-Generate markdown documentation for an HDF5 file:
+Convert an HDF5 file to markdown:
+
 ```bash
 h5md input.h5
 ```
 
-### Interactive HTML Report
+This will create `input.md` in the same directory. You can also specify a custom output path:
 
-Generate an interactive HTML report with visualizations:
 ```bash
-h5md input.h5 --format html --output-dir reports/
+h5md input.h5 -o output.md
 ```
 
-### Data Validation
+### Python API
 
-Validate HDF5 file against a schema:
-```bash
-h5md input.h5 --validate schema.json
+```python
+from markitdown_hdf5 import HDF5Converter
+
+# Create a converter
+converter = HDF5Converter()
+
+# Convert HDF5 to markdown
+markdown_content = converter.convert('input.h5')
+
+# Save to file
+with open('output.md', 'w') as f:
+    f.write(markdown_content)
 ```
 
-### File Comparison
+## Output Format
 
-Compare two HDF5 files:
-```bash
-h5md input.h5 --diff other.h5
+The generated markdown file includes:
+
+1. File structure with groups and datasets
+2. Dataset properties (shape, type)
+3. Group and dataset attributes
+4. Nicely formatted tables for metadata
+
+Example output:
+
+```markdown
+# HDF5 File Structure: input.h5
+
+## Group: data
+### Attributes:
+| Name | Value | Type |
+|------|--------|------|
+| `purpose` | `testing` | `str` |
+
+### Dataset: array
+| Property | Value |
+|----------|--------|
+| Shape | `(3,)` |
+| Type | `float64` |
+
+#### Dataset Attributes:
+| Name | Value | Type |
+|------|--------|------|
+| `unit` | `meters` | `str` |
 ```
 
-### JSON Export
+## Requirements
 
-Export metadata to JSON:
-```bash
-h5md input.h5 --format json -o metadata.json
-```
+- Python 3.10+
+- h5py
+- numpy
 
-### Advanced Options
+## License
 
-```bash
-h5md --help
-```
-
-## Features
-
-1. **Rich Metadata Visualization**
-   - Group hierarchy
-   - Dataset properties
-   - Attribute information
-   - Data statistics
-
-2. **Interactive HTML Reports**
-   - Dataset visualizations using Plotly
-   - Interactive file structure tree
-   - Statistical plots
-   - Responsive design
-
-3. **Data Validation**
-   - Schema-based validation
-   - Quality metrics
-   - Custom validation rules
-   - Detailed validation reports
-
-4. **File Comparison**
-   - Structure comparison
-   - Data differences
-   - Statistical analysis
-   - Visual diff reports
-
-5. **Multiple Output Formats**
-   - Markdown
-   - Interactive HTML
-   - JSON
-
-## Example
-
-```bash
-# Generate comprehensive HTML report with validation and comparison
-h5md input.h5 \
-    --format html \
-    --validate schema.json \
-    --diff reference.h5 \
-    --output-dir reports/
-```
-
-## Development
-
-Create a development environment:
-```bash
-conda env create -f environment.yml
-conda activate markitdown-hdf5-dev
-```
-
-Run tests:
-```bash
-pytest tests/
+MIT License
