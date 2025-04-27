@@ -1,7 +1,7 @@
 # HDF5 File Structure: sample.h5
 
 
-### Attributes:
+## Attributes:
 
 | Name | Value | Type |
 |------|--------|------|
@@ -14,7 +14,7 @@
 
 ### Dataset: matrix
 
-### Dataset Properties:
+#### Dataset Properties:
 
 | Property | Value |
 |----------|--------|
@@ -24,7 +24,7 @@
 
 ### Dataset: timeseries
 
-### Dataset Properties:
+#### Dataset Properties:
 
 | Property | Value |
 |----------|--------|
@@ -43,14 +43,14 @@
 
 ### Dataset: config
 
-### Dataset Properties:
+#### Dataset Properties:
 
 | Property | Value |
 |----------|--------|
 | Shape | `(3,)` |
 | Type | `|S10` |
 
-### Attributes:
+#### Attributes:
 
 | Name | Value | Type |
 |------|--------|------|
@@ -68,14 +68,14 @@
 
 ### Dataset: temperature
 
-### Dataset Properties:
+#### Dataset Properties:
 
 | Property | Value |
 |----------|--------|
 | Shape | `(24,)` |
 | Type | `float64` |
 
-### Attributes:
+#### Attributes:
 
 | Name | Value | Type |
 |------|--------|------|

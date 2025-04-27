@@ -43,7 +43,7 @@ class HDF5Converter:
     def _process_dataset(self, dataset: h5py.Dataset, header_level: int) -> None:
         """Process an HDF5 dataset."""
         # Dynamic header for Dataset Properties based on depth
-        prop_header = "#" * header_level + " Dataset Properties:"
+        prop_header = "#" * (header_level + 1) + " Dataset Properties:"
         self._output_lines.append(prop_header)
         self._output_lines.append("")  # Blank line before table
         self._output_lines.append("| Property | Value |")
@@ -57,7 +57,7 @@ class HDF5Converter:
         self._output_lines.append("")  # Blank line after table
 
         # Pass same header_level for dataset attributes
-        self._process_attributes(dataset, header_level)
+        self._process_attributes(dataset, header_level+1)
 
     def _process_group(self, group: h5py.Group, level: int = 1) -> None:
         """Process an HDF5 group."""
@@ -67,7 +67,7 @@ class HDF5Converter:
             self._output_lines.append("")  # Blank line after heading
 
         # Pass group level to attributes for dynamic header
-        self._process_attributes(group, level)
+        self._process_attributes(group, level+1)
 
         for name, item in group.items():
             if isinstance(item, h5py.Dataset):
