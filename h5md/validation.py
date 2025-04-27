@@ -5,12 +5,16 @@ import re
 import h5py
 import numpy as np
 
+
 @dataclass
 class ValidationRule:
     """Rules for validating HDF5 datasets."""
+
     path: str  # HDF5 path pattern
     dtype: Optional[str] = None  # Expected dtype
-    shape: Optional[Tuple[Optional[int], ...]] = None  # Expected shape (None for variable dimension)
+    shape: Optional[Tuple[Optional[int], ...]] = (
+        None  # Expected shape (None for variable dimension)
+    )
     min_value: Optional[float] = None
     max_value: Optional[float] = None
     required_attrs: Optional[List[str]] = None
@@ -18,12 +22,15 @@ class ValidationRule:
     allow_nan: bool = True
     allow_inf: bool = True
 
+
 class ValidationError(Exception):
     """Custom exception for validation errors."""
+
     def __init__(self, message: str, path: str) -> None:
         self.message = message
         self.path = path
         super().__init__(f"{path}: {message}")
+
 
 class DataValidator:
     def __init__(self) -> None:
@@ -37,7 +44,7 @@ class DataValidator:
         """Load validation rules from JSON schema file."""
         with open(schema_file, "r") as f:
             schema = json.load(f)
-        
+
         for rule_dict in schema.get("rules", []):
             rule = ValidationRule(**rule_dict)
             self.add_rule(rule)
@@ -50,22 +57,30 @@ class DataValidator:
     def validate_dataset(self, dataset: h5py.Dataset, path: str) -> List[str]:
         """Validate a dataset against matching rules."""
         errors: List[str] = []
-        
+
         for rule in self.rules.values():
             if self._match_path(path, rule.path):
                 # Check dtype
                 if rule.dtype and str(dataset.dtype) != rule.dtype:
-                    errors.append(f"Invalid dtype: expected {rule.dtype}, got {dataset.dtype}")
-                
+                    errors.append(
+                        f"Invalid dtype: expected {rule.dtype}, got {dataset.dtype}"
+                    )
+
                 # Check shape
                 if rule.shape:
                     if len(dataset.shape) != len(rule.shape):
-                        errors.append(f"Invalid shape length: expected {len(rule.shape)}, got {len(dataset.shape)}")
+                        errors.append(
+                            f"Invalid shape length: expected {len(rule.shape)}, got {len(dataset.shape)}"
+                        )
                     else:
-                        for i, (actual, expected) in enumerate(zip(dataset.shape, rule.shape)):
+                        for i, (actual, expected) in enumerate(
+                            zip(dataset.shape, rule.shape)
+                        ):
                             if expected is not None and actual != expected:
-                                errors.append(f"Invalid shape at dimension {i}: expected {expected}, got {actual}")
-                
+                                errors.append(
+                                    f"Invalid shape at dimension {i}: expected {expected}, got {actual}"
+                                )
+
                 # Check value range for numeric datasets
                 if np.issubdtype(dataset.dtype, np.number):
                     data = dataset[:]
@@ -77,18 +92,18 @@ class DataValidator:
                         errors.append(f"Values below minimum: {rule.min_value}")
                     if rule.max_value is not None and np.any(data > rule.max_value):
                         errors.append(f"Values above maximum: {rule.max_value}")
-                
+
                 # Check required attributes
                 if rule.required_attrs:
                     for attr in rule.required_attrs:
                         if attr not in dataset.attrs:
                             errors.append(f"Missing required attribute: {attr}")
-                
+
                 # Run custom validator if provided
                 if rule.custom_validator:
                     custom_errors = rule.custom_validator(dataset)
                     errors.extend(custom_errors)
-        
+
         return errors
 
     def validate_file(self, file: h5py.File) -> Dict[str, List[str]]:
@@ -103,6 +118,7 @@ class DataValidator:
 
         file.visititems(visit_item)
         return errors
+
 
 def format_validation_results_markdown(results: Dict[str, List[str]]) -> str:
     """Format validation results as markdown"""

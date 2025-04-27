@@ -1,117 +1,75 @@
-import json
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Dict, Optional
 import h5py
 import numpy as np
-from datetime import datetime
-import os
 
-class NumpyEncoder(json.JSONEncoder):
-    """Custom JSON encoder for numpy types."""
-    def default(self, obj: Any) -> Any:
-        if isinstance(obj, np.integer):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        elif isinstance(obj, bytes):
-            return obj.decode('utf-8')
-        return super().default(obj)
 
-def convert_to_json_serializable(value: Any) -> Any:
-    """Convert HDF5/numpy values to JSON-serializable types."""
+def format_value(value: object) -> object:
+    """Format a value for JSON output."""
     if isinstance(value, (np.integer, np.floating)):
         return value.item()
     elif isinstance(value, np.ndarray):
         return value.tolist()
     elif isinstance(value, bytes):
-        return value.decode('utf-8')
+        return value.decode("utf-8")
     return value
 
-def get_dataset_metadata(dataset: h5py.Dataset) -> Dict[str, Any]:
-    """Extract metadata from a dataset"""
-    metadata: Dict[str, Any] = {
+
+def process_attributes(item: h5py.Group | h5py.Dataset) -> Dict:
+    """Process attributes of an HDF5 object."""
+    result = {}
+    for key, value in item.attrs.items():
+        result[key] = format_value(value)
+    return result
+
+
+def process_dataset(dataset: h5py.Dataset) -> Dict:
+    """Process an HDF5 dataset."""
+    result = {
         "type": "dataset",
         "shape": dataset.shape,
-        "size": dataset.size * dataset.dtype.itemsize,
         "dtype": str(dataset.dtype),
-        "compression": dataset.compression,
-        "compression_opts": dataset.compression_opts,
-        "chunks": dataset.chunks,
-        "attributes": {},
+        "attributes": process_attributes(dataset),
     }
 
-    # Add attributes
-    for key, value in dataset.attrs.items():
-        metadata['attributes'][key] = convert_to_json_serializable(value)
+    if dataset.compression:
+        result["compression"] = dataset.compression
 
-    # Add statistics for numeric datasets
-    if np.issubdtype(dataset.dtype, np.number):
-        data = dataset[()]
-        metadata.update({
-            "statistics": {
-                "min": float(np.min(data)),
-                "max": float(np.max(data)),
-                "mean": float(np.mean(data)),
-                "std": float(np.std(data)),
-                "unique_values": int(len(np.unique(data)))
-            }
-        })
+    try:
+        if dataset.size <= 1000:  # Only include small datasets
+            result["data"] = format_value(dataset[()])
+    except Exception as e:
+        result["error"] = str(e)
 
-    return metadata
+    return result
 
-def get_group_metadata(group: h5py.Group) -> Dict[str, Any]:
-    """Extract metadata from a group"""
-    metadata: Dict[str, Any] = {
+
+def process_group(group: h5py.Group) -> Dict:
+    """Process an HDF5 group."""
+    result = {
         "type": "group",
-        "attributes": {},
-        "num_children": len(group.keys()),
+        "attributes": process_attributes(group),
+        "children": {},
     }
-    
-    # Add attributes
-    for key, value in group.attrs.items():
-        metadata['attributes'][key] = convert_to_json_serializable(value)
-    
-    return metadata
 
-def process_hdf5(group: h5py.Group, metadata_dict: Dict[str, Dict[str, Any]]) -> None:
-    """Recursively process HDF5 group structure"""
     for name, item in group.items():
-        path = item.name
         if isinstance(item, h5py.Dataset):
-            metadata_dict[path] = get_dataset_metadata(item)
+            result["children"][name] = process_dataset(item)
         elif isinstance(item, h5py.Group):
-            metadata_dict[path] = get_group_metadata(item)
-            process_hdf5(item, metadata_dict)
+            result["children"][name] = process_group(item)
 
-def export_to_json(input_path: str, output_path: Optional[str] = None) -> Optional[str]:
-    """Export HDF5 metadata to JSON format"""
-    metadata: Dict[str, Any] = {
-        "file_info": {
-            "path": input_path,
-            "size": os.path.getsize(input_path),
-            "created": datetime.fromtimestamp(os.path.getctime(input_path)).isoformat(),
-            "modified": datetime.fromtimestamp(os.path.getmtime(input_path)).isoformat(),
-            "attributes": {}
-        },
-        "contents": {}
-    }
+    return result
 
-    with h5py.File(input_path, "r") as f:
-        # Add file-level attributes
-        file_info = cast(Dict[str, Any], metadata["file_info"])
-        file_info["attributes"] = {}
-        for key, value in f.attrs.items():
-            file_info["attributes"][key] = convert_to_json_serializable(value)
 
-        # Process all groups and datasets
-        contents = cast(Dict[str, Dict[str, Any]], metadata["contents"])
-        process_hdf5(f, contents)
+def convert_to_json(file_path: str, output_path: Optional[str] = None) -> Dict:
+    """Convert an HDF5 file to JSON format."""
+    with h5py.File(file_path, "r") as f:
+        result = process_group(f)
+        result["file_path"] = file_path
 
-    # Write to JSON file or return string
     if output_path:
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(metadata, f, cls=NumpyEncoder, indent=2)
-        return None
-    else:
-        return json.dumps(metadata, cls=NumpyEncoder, indent=2)
+        import json
+
+        with open(output_path, "w") as f:
+            json.dump(result, f, indent=2)
+
+    return result
