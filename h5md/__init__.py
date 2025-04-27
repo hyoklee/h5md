@@ -1,5 +1,4 @@
-from typing import List, Optional
-
+from typing import Optional, List
 import h5py
 import numpy as np
 
@@ -22,12 +21,14 @@ class HDF5Converter:
             return value.decode("utf-8")
         return str(value)
 
-    def _process_attributes(self, item: h5py.Group | h5py.Dataset) -> None:
+    def _process_attributes(self, item: h5py.Group | h5py.Dataset, header_level: int) -> None:
         """Process attributes of an HDF5 object."""
         if not item.attrs:
             return
 
-        self._output_lines.append("### Attributes:")
+        # Dynamic header for Attributes based on depth
+        attr_header = "#" * header_level + " Attributes:"
+        self._output_lines.append(attr_header)
         self._output_lines.append("")  # Blank line before table
         self._output_lines.append("| Name | Value | Type |")
         self._output_lines.append("|------|--------|------|")
@@ -39,9 +40,11 @@ class HDF5Converter:
             self._output_lines.append(row)
         self._output_lines.append("")  # Blank line after table
 
-    def _process_dataset(self, dataset: h5py.Dataset) -> None:
+    def _process_dataset(self, dataset: h5py.Dataset, header_level: int) -> None:
         """Process an HDF5 dataset."""
-        self._output_lines.append("### Dataset Properties:")
+        # Dynamic header for Dataset Properties based on depth
+        prop_header = "#" * header_level + " Dataset Properties:"
+        self._output_lines.append(prop_header)
         self._output_lines.append("")  # Blank line before table
         self._output_lines.append("| Property | Value |")
         self._output_lines.append("|----------|--------|")
@@ -53,7 +56,8 @@ class HDF5Converter:
             self._output_lines.append(row)
         self._output_lines.append("")  # Blank line after table
 
-        self._process_attributes(dataset)
+        # Pass same header_level for dataset attributes
+        self._process_attributes(dataset, header_level)
 
     def _process_group(self, group: h5py.Group, level: int = 1) -> None:
         """Process an HDF5 group."""
@@ -62,14 +66,16 @@ class HDF5Converter:
             self._output_lines.append(header)
             self._output_lines.append("")  # Blank line after heading
 
-        self._process_attributes(group)
+        # Pass group level to attributes for dynamic header
+        self._process_attributes(group, level)
 
         for name, item in group.items():
             if isinstance(item, h5py.Dataset):
                 header = "\n" + "#" * (level + 1) + " Dataset: " + name
                 self._output_lines.append(header)
                 self._output_lines.append("")  # Blank line after heading
-                self._process_dataset(item)
+                # Pass dataset header level to process properties
+                self._process_dataset(item, level + 1)
             elif isinstance(item, h5py.Group):
                 self._process_group(item, level + 1)
 
