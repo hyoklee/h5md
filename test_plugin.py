@@ -9,10 +9,10 @@ plugin = HDF5Plugin()
 md.register_plugin(plugin)
 
 # Process the sample file
-output = md.process_file('sample.h5')
+output = md.process_file("sample.h5")
 
 # Save the output
-with open('sample_output.md', 'w') as f:
+with open("sample_output.md", "w") as f:
     f.write(output)
 
 print("Generated markdown output in sample_output.md")

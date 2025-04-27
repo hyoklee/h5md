@@ -1,6 +1,6 @@
 import h5py
-from markitdown_hdf5 import HDF5Plugin
 from markitdown import MarkdownBuilder
+from markitdown_hdf5 import HDF5Plugin
 
 # Create a markdown builder
 builder = MarkdownBuilder()
@@ -9,13 +9,13 @@ builder = MarkdownBuilder()
 plugin = HDF5Plugin()
 
 # Process the sample file directly
-plugin.process_file('sample.h5', builder)
+plugin.process_file("sample.h5", builder)
 
 # Get the markdown output
 output = builder.build()
 
 # Save the output
-with open('sample_output.md', 'w') as f:
+with open("sample_output.md", "w") as f:
     f.write(output)
 
 print("Generated markdown output in sample_output.md")

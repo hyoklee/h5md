@@ -1,26 +1,23 @@
-import sys
 import argparse
+import os
+from pathlib import Path
+
 from . import HDF5Converter
 
-def main():
-    parser = argparse.ArgumentParser(description='Convert HDF5 files to Markdown')
-    parser.add_argument('input', help='Input HDF5 file')
-    parser.add_argument('-o', '--output', help='Output Markdown file (default: input file with .md extension)')
-    
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Convert HDF5 files to markdown format"
+    )
+    parser.add_argument("file", help="HDF5 file to convert")
     args = parser.parse_args()
-    
-    # Set up output file path
-    output_path = args.output
-    if not output_path:
-        output_path = args.input.rsplit('.', 1)[0] + '.md'
-    
-    # Convert file
-    converter = HDF5Converter()
-    markdown_content = converter.convert(args.input)
-    
-    # Write output
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(markdown_content)
 
-if __name__ == '__main__':
+    converter = HDF5Converter()
+    result = converter.convert(args.file)
+
+    # Save to file with .md extension
+    output_path = Path(args.file).with_suffix(".md")
+    with open(output_path, "w") as f:
+        f.write(result)
+
+if __name__ == "__main__":
     main()

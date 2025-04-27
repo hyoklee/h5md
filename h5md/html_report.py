@@ -1,171 +1,168 @@
+import base64
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import h5py
 import numpy as np
-import json
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-import base64
-from datetime import datetime
-import plotly.graph_objects as go
 import plotly.express as px
-from .validation import DataValidator, ValidationResult
+import plotly.graph_objects as go
+
 from .diff import HDF5Differ
+from .validation import DataValidator, ValidationResult
+
 
 class HTMLReportGenerator:
-    def __init__(self, 
-                 template_dir: Optional[str] = None,
-                 max_preview_size: int = 1000):
+    def __init__(
+        self, template_dir: Optional[str] = None, max_preview_size: int = 1000
+    ):
         self.max_preview_size = max_preview_size
         self.validator = DataValidator()
         self.differ = HDF5Differ()
-        
+
     def _create_dataset_preview(self, dataset: h5py.Dataset) -> Dict[str, Any]:
         """Create a visual preview of the dataset"""
         preview = {
-            'path': dataset.name,
-            'shape': dataset.shape,
-            'dtype': str(dataset.dtype),
-            'size': dataset.size,
-            'plots': []
+            "path": dataset.name,
+            "shape": dataset.shape,
+            "dtype": str(dataset.dtype),
+            "size": dataset.size,
+            "plots": [],
         }
-        
+
         try:
             if dataset.size <= self.max_preview_size:
                 data = dataset[()]
-                
+
                 if np.issubdtype(dataset.dtype, np.number):
                     # Create histogram
                     fig = go.Figure(data=[go.Histogram(x=data.flatten())])
                     fig.update_layout(
                         title=f"Distribution of values in {dataset.name}",
                         xaxis_title="Value",
-                        yaxis_title="Count"
+                        yaxis_title="Count",
                     )
-                    preview['plots'].append({
-                        'type': 'histogram',
-                        'data': fig.to_json()
-                    })
-                    
+                    preview["plots"].append(
+                        {"type": "histogram", "data": fig.to_json()}
+                    )
+
                     # Create box plot
                     fig = go.Figure(data=[go.Box(y=data.flatten())])
                     fig.update_layout(
                         title=f"Box plot of values in {dataset.name}",
-                        yaxis_title="Value"
+                        yaxis_title="Value",
                     )
-                    preview['plots'].append({
-                        'type': 'boxplot',
-                        'data': fig.to_json()
-                    })
-                    
+                    preview["plots"].append({"type": "boxplot", "data": fig.to_json()})
+
                     # For 2D data, create heatmap
                     if len(dataset.shape) == 2:
                         fig = px.imshow(data)
-                        fig.update_layout(
-                            title=f"Heatmap of {dataset.name}"
+                        fig.update_layout(title=f"Heatmap of {dataset.name}")
+                        preview["plots"].append(
+                            {"type": "heatmap", "data": fig.to_json()}
                         )
-                        preview['plots'].append({
-                            'type': 'heatmap',
-                            'data': fig.to_json()
-                        })
-                
+
                 # Add basic statistics
                 if np.issubdtype(dataset.dtype, np.number):
-                    preview['statistics'] = {
-                        'min': float(np.min(data)),
-                        'max': float(np.max(data)),
-                        'mean': float(np.mean(data)),
-                        'median': float(np.median(data)),
-                        'std': float(np.std(data))
+                    preview["statistics"] = {
+                        "min": float(np.min(data)),
+                        "max": float(np.max(data)),
+                        "mean": float(np.mean(data)),
+                        "median": float(np.median(data)),
+                        "std": float(np.std(data)),
                     }
         except Exception as e:
-            preview['error'] = str(e)
-            
+            preview["error"] = str(e)
+
         return preview
 
-    def generate_report(self, 
-                       file_path: str,
-                       output_dir: str,
-                       validation_schema: Optional[str] = None,
-                       diff_file: Optional[str] = None) -> str:
+    def generate_report(
+        self,
+        file_path: str,
+        output_dir: str,
+        validation_schema: Optional[str] = None,
+        diff_file: Optional[str] = None,
+    ) -> str:
         """Generate an interactive HTML report for an HDF5 file"""
-        
+
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         report_data = {
-            'file_info': {
-                'path': file_path,
-                'size': Path(file_path).stat().st_size,
-                'modified': datetime.fromtimestamp(Path(file_path).stat().st_mtime).isoformat(),
-                'created': datetime.fromtimestamp(Path(file_path).stat().st_ctime).isoformat()
+            "file_info": {
+                "path": file_path,
+                "size": Path(file_path).stat().st_size,
+                "modified": datetime.fromtimestamp(
+                    Path(file_path).stat().st_mtime
+                ).isoformat(),
+                "created": datetime.fromtimestamp(
+                    Path(file_path).stat().st_ctime
+                ).isoformat(),
             },
-            'structure': {},
-            'previews': [],
-            'validation': None,
-            'diff': None
+            "structure": {},
+            "previews": [],
+            "validation": None,
+            "diff": None,
         }
-        
+
         # Load validation schema if provided
         if validation_schema:
             self.validator.load_schema(validation_schema)
-        
-        with h5py.File(file_path, 'r') as f:
+
+        with h5py.File(file_path, "r") as f:
             # Add file attributes
-            report_data['file_info']['attributes'] = dict(f.attrs)
-            
+            report_data["file_info"]["attributes"] = dict(f.attrs)
+
             # Process structure and generate previews
             def process_group(name, obj):
                 if isinstance(obj, h5py.Dataset):
-                    report_data['previews'].append(
-                        self._create_dataset_preview(obj)
-                    )
-                
+                    report_data["previews"].append(self._create_dataset_preview(obj))
+
                 info = {
-                    'type': 'dataset' if isinstance(obj, h5py.Dataset) else 'group',
-                    'attributes': dict(obj.attrs)
+                    "type": "dataset" if isinstance(obj, h5py.Dataset) else "group",
+                    "attributes": dict(obj.attrs),
                 }
-                
+
                 if isinstance(obj, h5py.Dataset):
-                    info.update({
-                        'shape': obj.shape,
-                        'dtype': str(obj.dtype),
-                        'size': obj.size
-                    })
-                
-                report_data['structure'][name] = info
-            
+                    info.update(
+                        {"shape": obj.shape, "dtype": str(obj.dtype), "size": obj.size}
+                    )
+
+                report_data["structure"][name] = info
+
             f.visititems(process_group)
-        
+
         # Run validation if schema was provided
         if validation_schema:
             validation_results = self.validator.validate_file(file_path)
-            report_data['validation'] = {
+            report_data["validation"] = {
                 path: {
-                    'is_valid': result.is_valid,
-                    'issues': result.issues,
-                    'quality_score': result.quality_score
+                    "is_valid": result.is_valid,
+                    "issues": result.issues,
+                    "quality_score": result.quality_score,
                 }
                 for path, result in validation_results.items()
             }
-        
+
         # Generate diff if comparison file was provided
         if diff_file:
             diff_results = self.differ.compare_files(file_path, diff_file)
-            report_data['diff'] = diff_results
-        
+            report_data["diff"] = diff_results
+
         # Generate HTML
         html_content = self._generate_html(report_data)
-        
+
         # Save report
-        output_file = output_dir / 'report.html'
-        output_file.write_text(html_content, encoding='utf-8')
-        
+        output_file = output_dir / "report.html"
+        output_file.write_text(html_content, encoding="utf-8")
+
         # Save data for interactive features
-        data_file = output_dir / 'report_data.js'
+        data_file = output_dir / "report_data.js"
         data_file.write_text(
-            f"const reportData = {json.dumps(report_data, indent=2)};",
-            encoding='utf-8'
+            f"const reportData = {json.dumps(report_data, indent=2)};", encoding="utf-8"
         )
-        
+
         return str(output_file)
 
     def _generate_html(self, report_data: Dict[str, Any]) -> str:
@@ -428,10 +425,15 @@ class HTMLReportGenerator:
 </html>
 """
 
-def generate_report(file_path: str,
-                   output_dir: str,
-                   validation_schema: Optional[str] = None,
-                   diff_file: Optional[str] = None) -> str:
+
+def generate_report(
+    file_path: str,
+    output_dir: str,
+    validation_schema: Optional[str] = None,
+    diff_file: Optional[str] = None,
+) -> str:
     """Convenience function to generate an HTML report"""
     generator = HTMLReportGenerator()
-    return generator.generate_report(file_path, output_dir, validation_schema, diff_file)
+    return generator.generate_report(
+        file_path, output_dir, validation_schema, diff_file
+    )

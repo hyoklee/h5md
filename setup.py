@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -15,8 +15,8 @@ setup(
         "numpy>=1.20.0",
     ],
     entry_points={
-        'console_scripts': [
-            'h5md=h5md.cli:main',
+        "console_scripts": [
+            "h5md=h5md.cli:main",
         ],
     },
     long_description=long_description,
@@ -25,7 +25,7 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

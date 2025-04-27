@@ -1,13 +1,13 @@
 import h5py
-from typing import List, Dict, Any
+from typing import List, Any
 
-def register():
+def register() -> 'HDF5Converter':
     """Register the HDF5 plugin"""
     return HDF5Converter()
 
 class MarkdownBuilder:
-    def __init__(self):
-        self._content = []
+    def __init__(self) -> None:
+        self._content: List[str] = []
 
     def add_heading(self, text: str, level: int = 1) -> None:
         self._content.append(f"{'#' * level} {text}\n")
@@ -41,7 +41,8 @@ class HDF5Converter:
         
         try:
             with h5py.File(file_path, 'r') as f:
-                builder.add_heading(f"HDF5 File Structure: {file_path}", 1)
+                builder.add_heading(f"HDF5 File Structure: {file_path}")
+                builder.add_paragraph("")  # Add empty line after heading
                 self._process_group(f, builder)
         except Exception as e:
             builder.add_paragraph(f"Error processing HDF5 file: {str(e)}")
@@ -52,6 +53,7 @@ class HDF5Converter:
         # Process group attributes
         if len(group.attrs) > 0:
             builder.add_heading("Attributes:", indent + 2)
+            builder.add_paragraph("")  
             attrs_table = [["Name", "Value", "Type"]]
             for key, value in group.attrs.items():
                 attrs_table.append([
@@ -65,6 +67,7 @@ class HDF5Converter:
         for name, item in group.items():
             if isinstance(item, h5py.Dataset):
                 builder.add_heading(f"Dataset: {name}", indent + 2)
+                builder.add_paragraph("")  
                 dataset_info = [
                     ["Property", "Value"],
                     ["Shape", f"`{item.shape}`"],
@@ -75,6 +78,7 @@ class HDF5Converter:
                 # Process dataset attributes
                 if len(item.attrs) > 0:
                     builder.add_heading("Dataset Attributes:", indent + 3)
+                    builder.add_paragraph("")  
                     dataset_attrs = [["Name", "Value", "Type"]]
                     for key, value in item.attrs.items():
                         dataset_attrs.append([
@@ -86,4 +90,5 @@ class HDF5Converter:
             
             elif isinstance(item, h5py.Group):
                 builder.add_heading(f"Group: {name}", indent + 2)
+                builder.add_paragraph("")  
                 self._process_group(item, builder, indent + 1)
