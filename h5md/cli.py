@@ -25,8 +25,8 @@ def main() -> None:
     # Check if input file exists
     if not Path(args.file).is_file():
         msg = (
-            f"Error: Input file '{args.file}' does not exist"
-        )
+            "Error: Input file '{}' does not exist"
+        ).format(args.file)
         print(msg, file=sys.stderr)
         sys.exit(1)
 
