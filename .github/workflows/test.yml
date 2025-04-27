@@ -58,7 +58,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
 
@@ -127,6 +127,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v3
 
     - name: miniconda
       uses: conda-incubator/setup-miniconda@v3
