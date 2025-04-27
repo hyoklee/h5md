@@ -4,6 +4,7 @@ from pathlib import Path
 
 from . import HDF5Converter
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Convert HDF5 files to markdown format"
@@ -18,6 +19,7 @@ def main() -> None:
     output_path = Path(args.file).with_suffix(".md")
     with open(output_path, "w") as f:
         f.write(result)
+
 
 if __name__ == "__main__":
     main()

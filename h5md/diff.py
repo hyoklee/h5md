@@ -1,6 +1,6 @@
 import difflib
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import h5py
 import numpy as np
@@ -41,7 +41,7 @@ class HDF5Differ:
         self, attrs1: h5py.AttributeManager, attrs2: h5py.AttributeManager
     ) -> Dict[str, Tuple[Any, Any]]:
         """Compare attributes between two objects"""
-        changes = {}
+        changes: Dict[str, Tuple[Any, Any]] = {}
 
         # Check for changed or removed attributes
         for key in attrs1.keys():
@@ -61,15 +61,17 @@ class HDF5Differ:
         self, dset1: h5py.Dataset, dset2: h5py.Dataset
     ) -> DatasetDiff:
         """Compare two datasets"""
-        shape_changed = dset1.shape != dset2.shape
-        dtype_changed = dset1.dtype != dset2.dtype
-        attr_changes = self._compare_attributes(dset1.attrs, dset2.attrs)
+        shape_changed: bool = dset1.shape != dset2.shape
+        dtype_changed: bool = dset1.dtype != dset2.dtype
+        attr_changes: Dict[str, Tuple[Any, Any]] = self._compare_attributes(
+            dset1.attrs, dset2.attrs
+        )
 
-        data_changes = None
-        max_diff = None
-        mean_diff = None
-        changed_elements = None
-        total_elements = dset1.size
+        data_changes: Optional[Dict[str, Any]] = None
+        max_diff: Optional[float] = None
+        mean_diff: Optional[float] = None
+        changed_elements: Optional[int] = None
+        total_elements: int = dset1.size
 
         # Compare data if shapes and dtypes match
         if (
@@ -79,22 +81,22 @@ class HDF5Differ:
         ):
             try:
                 # Load data (might need chunking for large datasets)
-                data1 = dset1[()]
-                data2 = dset2[()]
+                data1: np.ndarray = dset1[()]
+                data2: np.ndarray = dset2[()]
 
                 # Calculate differences
-                abs_diff = np.abs(data1 - data2)
-                rel_diff = abs_diff / (np.abs(data1) + self.atol)
+                abs_diff: np.ndarray = np.abs(data1 - data2)
+                rel_diff: np.ndarray = abs_diff / (np.abs(data1) + self.atol)
 
-                changed_mask = (abs_diff > self.atol) & (rel_diff > self.rtol)
-                changed_elements = np.sum(changed_mask)
+                changed_mask: np.ndarray = (abs_diff > self.atol) & (rel_diff > self.rtol)
+                changed_elements: int = np.sum(changed_mask)
 
                 if changed_elements > 0:
-                    max_diff = float(np.max(abs_diff))
-                    mean_diff = float(np.mean(abs_diff))
+                    max_diff: float = float(np.max(abs_diff))
+                    mean_diff: float = float(np.mean(abs_diff))
 
                     # Get statistical differences
-                    data_changes = {
+                    data_changes: Dict[str, Any] = {
                         "min_diff": float(np.min(abs_diff[changed_mask])),
                         "max_diff": max_diff,
                         "mean_diff": mean_diff,
@@ -104,8 +106,8 @@ class HDF5Differ:
 
                     # Get some example differences if not too many
                     if changed_elements <= self.max_diff_elements:
-                        changed_indices = np.where(changed_mask)
-                        data_changes["examples"] = [
+                        changed_indices: np.ndarray = np.where(changed_mask)
+                        data_changes["examples"]: List[Dict[str, Any]] = [
                             {
                                 "index": tuple(int(i) for i in idx),
                                 "old_value": float(data1[idx]),
@@ -115,7 +117,7 @@ class HDF5Differ:
                             for idx in zip(*changed_indices)
                         ]
             except Exception as e:
-                data_changes = {"error": str(e)}
+                data_changes: Dict[str, Any] = {"error": str(e)}
 
         return DatasetDiff(
             path=dset1.name,
@@ -132,21 +134,23 @@ class HDF5Differ:
 
     def compare_files(self, file1_path: str, file2_path: str) -> Dict[str, Any]:
         """Compare two HDF5 files"""
-        dataset_diffs = {}
-        group_diffs = {}
+        dataset_diffs: Dict[str, DatasetDiff] = {}
+        group_diffs: Dict[str, GroupDiff] = {}
 
         with h5py.File(file1_path, "r") as f1, h5py.File(file2_path, "r") as f2:
             # Compare file-level attributes
-            file_attr_changes = self._compare_attributes(f1.attrs, f2.attrs)
+            file_attr_changes: Dict[str, Tuple[Any, Any]] = self._compare_attributes(
+                f1.attrs, f2.attrs
+            )
 
             # Get all paths in both files
-            paths1 = set(f1.keys())
-            paths2 = set(f2.keys())
+            paths1: Set[str] = set(f1.keys())
+            paths2: Set[str] = set(f2.keys())
 
             # Process common paths
             for path in paths1 & paths2:
-                obj1 = f1[path]
-                obj2 = f2[path]
+                obj1: Union[h5py.Dataset, h5py.Group] = f1[path]
+                obj2: Union[h5py.Dataset, h5py.Group] = f2[path]
 
                 if isinstance(obj1, h5py.Dataset) and isinstance(obj2, h5py.Dataset):
                     dataset_diffs[path] = self._compare_datasets(obj1, obj2)
@@ -161,7 +165,7 @@ class HDF5Differ:
 
             # Process paths only in file1
             for path in paths1 - paths2:
-                obj = f1[path]
+                obj: Union[h5py.Dataset, h5py.Group] = f1[path]
                 if isinstance(obj, h5py.Dataset):
                     dataset_diffs[path] = DatasetDiff(
                         path=path,
@@ -182,7 +186,7 @@ class HDF5Differ:
 
             # Process paths only in file2
             for path in paths2 - paths1:
-                obj = f2[path]
+                obj: Union[h5py.Dataset, h5py.Group] = f2[path]
                 if isinstance(obj, h5py.Dataset):
                     dataset_diffs[path] = DatasetDiff(
                         path=path,
@@ -210,7 +214,7 @@ class HDF5Differ:
 
 def format_diff_markdown(diff_results: Dict[str, Any]) -> str:
     """Format diff results as markdown"""
-    lines = ["# HDF5 File Comparison Results\n"]
+    lines: List[str] = ["# HDF5 File Comparison Results\n"]
 
     # File-level changes
     if diff_results["file_attr_changes"]:
@@ -230,7 +234,7 @@ def format_diff_markdown(diff_results: Dict[str, Any]) -> str:
         lines.append("## Group Changes")
         for path, diff in sorted(diff_results["group_diffs"].items()):
             if not diff.exists_in_both:
-                status = "Removed from" if diff.removed_children else "Added to"
+                status: str = "Removed from" if diff.removed_children else "Added to"
                 lines.append(f"### 🗂️ Group `{path}` ({status} new file)")
                 continue
 
@@ -264,11 +268,11 @@ def format_diff_markdown(diff_results: Dict[str, Any]) -> str:
         lines.append("## Dataset Changes")
         for path, diff in sorted(diff_results["dataset_diffs"].items()):
             if not diff.exists_in_both:
-                status = "Removed from" if diff.attr_changes else "Added to"
+                status: str = "Removed from" if diff.attr_changes else "Added to"
                 lines.append(f"### 📊 Dataset `{path}` ({status} new file)")
                 continue
 
-            status = []
+            status: List[str] = []
             if diff.shape_changed:
                 status.append("shape changed")
             if diff.dtype_changed:

@@ -13,7 +13,18 @@ A simple command-line tool to convert HDF5 files to markdown format. This tool h
 ## Installation
 
 ```bash
-pip install hdf5-to-markdown
+# Clone the repository
+git clone https://github.com/hyoklee/h5md.git
+cd h5md
+
+# Install in development mode
+pip install -e .
+```
+
+Or install directly from GitHub:
+
+```bash
+pip install git+https://github.com/hyoklee/h5md.git
 ```
 
 ## Usage
@@ -35,7 +46,7 @@ h5md input.h5 -o output.md
 ### Python API
 
 ```python
-from markitdown_hdf5 import HDF5Converter
+from h5md import HDF5Converter
 
 # Create a converter
 converter = HDF5Converter()
