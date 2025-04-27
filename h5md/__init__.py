@@ -1,4 +1,5 @@
-from typing import Optional, List
+from typing import List, Optional
+
 import h5py
 import numpy as np
 
