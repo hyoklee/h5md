@@ -32,10 +32,7 @@ class HDF5Converter:
         for key, value in item.attrs.items():
             formatted_value = self._format_value(value)
             value_type = type(value).__name__
-            row = (
-                "| `{}` | `{}` | "
-                "`{}` |"
-            ).format(key, formatted_value, value_type)
+            row = ("| `{}` | `{}` | " "`{}` |").format(key, formatted_value, value_type)
             self._output_lines.append(row)
         self._output_lines.append("")  # Blank line after table
 
@@ -49,10 +46,7 @@ class HDF5Converter:
         self._output_lines.append(f"| Type | `{dataset.dtype}` |")
 
         if dataset.compression:
-            row = (
-                "| Compression | "
-                f"`{dataset.compression}` |"
-            )
+            row = "| Compression | " f"`{dataset.compression}` |"
             self._output_lines.append(row)
         self._output_lines.append("")  # Blank line after table
 
@@ -86,9 +80,7 @@ class HDF5Converter:
         with h5py.File(file_path, "r") as f:
             self._process_group(f)
 
-        markdown_content = (
-            "\n".join(self._output_lines)
-        )
+        markdown_content = "\n".join(self._output_lines)
 
         if output_path:
             with open(output_path, "w") as f:

@@ -15,8 +15,7 @@ def main() -> None:
         "-o",
         "--output",
         help=(
-            "Output markdown file path "
-            "(defaults to input file with .md extension)"
+            "Output markdown file path " "(defaults to input file with .md extension)"
         ),
         default=None,
     )
@@ -24,9 +23,7 @@ def main() -> None:
 
     # Check if input file exists
     if not Path(args.file).is_file():
-        msg = (
-            "Error: Input file '{}' does not exist"
-        ).format(args.file)
+        msg = ("Error: Input file '{}' does not exist").format(args.file)
         print(msg, file=sys.stderr)
         sys.exit(1)
 
