@@ -117,3 +117,22 @@ jobs:
         name: dist
         path: dist/
         if-no-files-found: error
+
+  conda:
+    name: Build Conda
+    runs-on: ${{ matrix.os }}
+    needs: [test, lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11']
+
+    - name: miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-update-conda: true
+        python-version: ${{ matrix.python-version }}
+
+    - name: Build conda
+      run: conda-build .

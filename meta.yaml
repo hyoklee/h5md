@@ -1,4 +1,4 @@
-{% set name = "markitdown-hdf5" %}
+{% set name = "h5md" %}
 {% set version = "0.1.0" %}
 
 package:
@@ -10,7 +10,6 @@ source:
 
 build:
   number: 0
-  noarch: python
   script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
@@ -22,27 +21,27 @@ requirements:
     - python >=3.7
     - h5py >=3.0.0
     - numpy >=1.19.0
-    - markitdown >=0.1.0
 
 test:
   imports:
-    - markitdown_hdf5
+    - h5md
   requires:
     - pytest
   commands:
-    - python -c "import markitdown_hdf5"
+    - python -c "import h5md"
 
 about:
-  home: https://github.com/microsoft/markitdown
-  license: MIT
-  license_family: MIT
-  summary: A Markitdown plugin for HDF5 metadata visualization
+  home: https://github.com/hyoklee/h5md
+  license: BSD
+  license_family: BSD
+  summary: HDF5 to markdown converter
   description: |
-    A plugin for Markitdown that provides rich visualization of HDF5 file metadata,
-    including group structure, dataset information, and attributes in markdown format.
-  doc_url: https://github.com/microsoft/markitdown
-  dev_url: https://github.com/microsoft/markitdown
+    An HDF5 converter for Markdown that provides rich visualization of
+    HDF5 file metadata,including group structure, dataset information, and
+    attributes in markdown format.
+  doc_url: https://github.com/hyoklee/h5md
+  dev_url: https://github.com/hyoklee/h5md
 
 extra:
   recipe-maintainers:
-    - your-github-username
+    - hyoklee
