@@ -1,5 +1,3 @@
-import os
-
 import h5py
 import numpy as np
 import pytest
@@ -24,7 +22,8 @@ def sample_hdf5_file(tmp_path):
         dset1 = group.create_dataset("array", data=np.array([1, 2, 3]))
         dset1.attrs["unit"] = "meters"
 
-        dset2 = group.create_dataset("matrix", data=np.ones((2, 2)))
+        # Create a matrix dataset
+        group.create_dataset("matrix", data=np.ones((2, 2)))
 
     return file_path
 

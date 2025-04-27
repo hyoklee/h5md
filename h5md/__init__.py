@@ -24,44 +24,53 @@ class HDF5Converter:
         if not item.attrs:
             return
 
-        self._output_lines.append("\n### Attributes:\n")
+        self._output_lines.append("### Attributes:")
+        self._output_lines.append("")  # Blank line before table
         self._output_lines.append("| Name | Value | Type |")
         self._output_lines.append("|------|--------|------|")
 
         for key, value in item.attrs.items():
             formatted_value = self._format_value(value)
             value_type = type(value).__name__
-            self._output_lines.append(
-                f"| `{key}` | `{formatted_value}` | `{value_type}` |"
+            row = (
+                f"| `{key}` | `{formatted_value}` | "
+                f"`{value_type}` |"
             )
-        self._output_lines.append("")
+            self._output_lines.append(row)
+        self._output_lines.append("")  # Blank line after table
 
     def _process_dataset(self, dataset: h5py.Dataset) -> None:
         """Process an HDF5 dataset."""
-        self._output_lines.append("\n### Dataset Properties:\n")
+        self._output_lines.append("### Dataset Properties:")
+        self._output_lines.append("")  # Blank line before table
         self._output_lines.append("| Property | Value |")
         self._output_lines.append("|----------|--------|")
         self._output_lines.append(f"| Shape | `{dataset.shape}` |")
         self._output_lines.append(f"| Type | `{dataset.dtype}` |")
 
         if dataset.compression:
-            self._output_lines.append(f"| Compression | `{dataset.compression}` |")
-        self._output_lines.append("")
+            row = (
+                f"| Compression | `{dataset.compression}` |"
+            )
+            self._output_lines.append(row)
+        self._output_lines.append("")  # Blank line after table
 
         self._process_attributes(dataset)
 
     def _process_group(self, group: h5py.Group, level: int = 1) -> None:
         """Process an HDF5 group."""
         if level > 1:
-            self._output_lines.append("\n" + "#" * level + " Group: " + group.name)
+            header = "\n" + "#" * level + " Group: " + group.name
+            self._output_lines.append(header)
+            self._output_lines.append("")  # Blank line after heading
 
         self._process_attributes(group)
 
         for name, item in group.items():
             if isinstance(item, h5py.Dataset):
-                self._output_lines.append(
-                    "\n" + "#" * (level + 1) + f" Dataset: {name}"
-                )
+                header = "\n" + "#" * (level + 1) + " Dataset: " + name
+                self._output_lines.append(header)
+                self._output_lines.append("")  # Blank line after heading
                 self._process_dataset(item)
             elif isinstance(item, h5py.Group):
                 self._process_group(item, level + 1)
@@ -69,7 +78,9 @@ class HDF5Converter:
     def convert(self, file_path: str, output_path: Optional[str] = None) -> str:
         """Convert an HDF5 file to markdown format."""
         self._output_lines = []
-        self._output_lines.append(f"# HDF5 File Structure: {file_path}\n")
+        header = f"# HDF5 File Structure: {file_path}\n"
+        self._output_lines.append(header)
+        self._output_lines.append("")  # Blank line after heading
 
         with h5py.File(file_path, "r") as f:
             self._process_group(f)
