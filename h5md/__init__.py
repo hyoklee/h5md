@@ -81,6 +81,13 @@ class HDF5Converter:
                 self._process_dataset(item, level + 1)
             elif isinstance(item, h5py.Group):
                 self._process_group(item, level + 1)
+            elif isinstance(item, h5py.ExternalLink):
+                header = "\n" + "#" * (level + 1) + " External Link: " + name
+                self._output_lines.append(header)
+                self._output_lines.append("")  # Blank line after heading
+                self._output_lines.append(f"- **Target File:** `{item.filename}`")
+                self._output_lines.append(f"- **Target Path:** `{item.path}`")
+                self._output_lines.append("")  # Blank line after details
 
     def convert(self, file_path: str, output_path: Optional[str] = None) -> str:
         """Convert an HDF5 file to markdown format."""

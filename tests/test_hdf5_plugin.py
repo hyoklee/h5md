@@ -25,6 +25,13 @@ def sample_hdf5_file(tmp_path):
         # Create a matrix dataset
         group.create_dataset("matrix", data=np.ones((2, 2)))
 
+        # Create an external link
+        external_file_path = tmp_path / "external_target.h5"
+        with h5py.File(external_file_path, "w") as ext_f:
+            ext_f.create_dataset("linked_data", data=np.array([4, 5, 6]))
+        
+        f["external_link"] = h5py.ExternalLink(external_file_path.name, "/linked_data")
+
     return file_path
 
 
@@ -38,6 +45,17 @@ def test_hdf5_conversion(sample_hdf5_file):
     assert "array" in result
     assert "matrix" in result
     assert "meters" in result
+
+
+def test_hdf5_external_link_conversion(sample_hdf5_file):
+    converter = HDF5Converter()
+    result = converter.convert(str(sample_hdf5_file))
+
+    assert "External Link: external_link" in result
+    assert "Target File:" in result
+    assert "external_target.h5" in result
+    assert "Target Path:" in result
+    assert "/linked_data" in result
 
 
 def test_cli_basic(sample_hdf5_file):
