@@ -8,7 +8,7 @@ from h5md import HDF5Converter
 def main() -> None:
     """Command-line interface for HDF5 to markdown converter."""
     parser = argparse.ArgumentParser(
-        description="Convert HDF5 files to markdown format"
+        description="Convert HDF5 files to AI-friendly markdown format with key-value structure"
     )
     parser.add_argument("file", help="HDF5 file to convert")
     parser.add_argument(
@@ -18,6 +18,34 @@ def main() -> None:
             "Output markdown file path " "(defaults to input file with .md extension)"
         ),
         default=None,
+    )
+    parser.add_argument(
+        "--max-rows",
+        type=int,
+        default=10,
+        help="Maximum number of rows to include in dataset previews (default: 10, use 0 for all)",
+    )
+    parser.add_argument(
+        "--max-cols",
+        type=int,
+        default=10,
+        help="Maximum number of columns to include in dataset previews (default: 10, use 0 for all)",
+    )
+    parser.add_argument(
+        "--sampling",
+        choices=["first", "uniform", "edges"],
+        default="first",
+        help=(
+            "Sampling strategy when limits are exceeded: "
+            "'first' (default) takes first N items, "
+            "'uniform' samples uniformly across dataset, "
+            "'edges' shows first and last items"
+        ),
+    )
+    parser.add_argument(
+        "--no-data",
+        action="store_true",
+        help="Exclude actual data values from output (metadata only)",
     )
     args = parser.parse_args()
 
@@ -33,7 +61,16 @@ def main() -> None:
         if output_path is None:
             output_path = str(Path(args.file).with_suffix(".md"))
 
-        converter = HDF5Converter()
+        # Convert 0 to None (meaning no limit)
+        max_rows = None if args.max_rows == 0 else args.max_rows
+        max_cols = None if args.max_cols == 0 else args.max_cols
+
+        converter = HDF5Converter(
+            max_rows=max_rows,
+            max_cols=max_cols,
+            sampling_strategy=args.sampling,
+            include_data_preview=not args.no_data,
+        )
         converter.convert(args.file, output_path)
         print(f"Successfully converted {args.file} to {output_path}")
     except Exception as e:
