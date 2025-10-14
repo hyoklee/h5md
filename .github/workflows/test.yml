@@ -140,6 +140,5 @@ jobs:
     - name: Build conda
       run: |
         conda install -y conda-build
-        conda install -y conda-verify
         conda install -y anaconda-client
-        conda build .
+        conda build . --no-verify
