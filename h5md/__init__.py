@@ -1,4 +1,4 @@
-from typing import List, Optional, Literal
+from typing import List, Literal, Optional
 
 import h5py
 import numpy as np
@@ -68,14 +68,12 @@ class HDF5Converter:
             indices = np.arange(limit)
         elif self._sampling_strategy == "uniform":
             indices = np.linspace(0, size - 1, limit, dtype=int)
-        elif self._sampling_strategy == "edges":
+        else:  # "edges"
             # Take half from start, half from end
             half = limit // 2
             start_indices = np.arange(half)
             end_indices = np.arange(size - (limit - half), size)
             indices = np.concatenate([start_indices, end_indices])
-        else:
-            indices = np.arange(limit)
 
         return np.take(arr, indices, axis=axis)
 
@@ -152,7 +150,7 @@ class HDF5Converter:
                 result.append("**Data (Multi-dimensional Array):**")
                 result.append("")
                 result.append(f"- **Sample shape:** `{data.shape}`")
-                result.append(f"- **Flattened preview (first 20 values):**")
+                result.append("- **Flattened preview (first 20 values):**")
                 flat = data.flatten()[:20]
                 for i, val in enumerate(flat):
                     result.append(f"  - `element_{i}`: `{self._format_value(val)}`")
