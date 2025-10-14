@@ -157,7 +157,9 @@ class HDF5Converter:
                 for i, val in enumerate(flat):
                     result.append(f"  - `element_{i}`: `{self._format_value(val)}`")
                 if len(data.flatten()) > 20:
-                    result.append(f"  - *(showing 20 of {len(data.flatten())} total elements)*")
+                    result.append(
+                        f"  - *(showing 20 of {len(data.flatten())} total elements)*"
+                    )
 
             return "\n".join(result)
 
@@ -179,7 +181,9 @@ class HDF5Converter:
         for key, value in item.attrs.items():
             formatted_value = self._format_value(value)
             value_type = type(value).__name__
-            self._output_lines.append(f"- **{key}:** `{formatted_value}` (type: `{value_type}`)")
+            self._output_lines.append(
+                f"- **{key}:** `{formatted_value}` (type: `{value_type}`)"
+            )
         self._output_lines.append("")
 
     def _process_dataset(self, dataset: h5py.Dataset, header_level: int) -> None:
