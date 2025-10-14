@@ -1,14 +1,16 @@
 # HDF5 to Markdown Converter
 
-A simple command-line tool to convert HDF5 files to markdown format. This tool helps you visualize the structure, metadata, and attributes of HDF5 files in a human-readable markdown format.
+A command-line tool to convert HDF5 files to AI-friendly markdown format with key-value structure. This tool helps you visualize the structure, metadata, and actual data from HDF5 files in a format optimized for both human readability and AI consumption.
 
 ## Features
 
-- Convert HDF5 files to markdown format
-- Display file structure including groups and datasets
-- Show dataset properties (shape, type)
-- List attributes for groups and datasets
-- Clean and readable markdown output
+- **AI-friendly key-value format** - Structured output optimized for AI parsing
+- **Smart data subsetting** - Preview large datasets with configurable row/column limits
+- **Multiple sampling strategies** - Choose how to sample data: first, uniform, or edges
+- **Flexible data preview** - Include or exclude actual data values
+- **Complete metadata** - Display file structure, groups, datasets, and attributes
+- **External link support** - Detect and display HDF5 external links
+- **Compression info** - Show dataset compression and chunking details
 
 ## Installation
 
@@ -31,16 +33,50 @@ pip install git+https://github.com/hyoklee/h5md.git
 
 ### Command Line
 
-Convert an HDF5 file to markdown:
+**Basic conversion** (uses defaults: 10 rows/cols, 'first' sampling):
 
 ```bash
 h5md input.h5
 ```
 
-This will create `input.md` in the same directory. You can also specify a custom output path:
+This will create `input.md` in the same directory.
+
+**Custom output path:**
 
 ```bash
 h5md input.h5 -o output.md
+```
+
+**Control data subsetting:**
+
+```bash
+# Limit to 5 rows and 5 columns
+h5md input.h5 --max-rows 5 --max-cols 5
+
+# Show all data (use carefully with large files!)
+h5md input.h5 --max-rows 0 --max-cols 0
+
+# Metadata only (no data values)
+h5md input.h5 --no-data
+```
+
+**Choose sampling strategy:**
+
+```bash
+# Take first N items (default)
+h5md input.h5 --sampling first
+
+# Sample uniformly across dataset
+h5md input.h5 --sampling uniform
+
+# Show first and last items (useful for ranges)
+h5md input.h5 --sampling edges
+```
+
+**Combined options:**
+
+```bash
+h5md data.h5 -o output.md --max-rows 20 --max-cols 10 --sampling edges
 ```
 
 ### Python API
@@ -48,48 +84,102 @@ h5md input.h5 -o output.md
 ```python
 from h5md import HDF5Converter
 
-# Create a converter
+# Basic conversion with defaults
 converter = HDF5Converter()
+markdown_content = converter.convert('input.h5', 'output.md')
 
-# Convert HDF5 to markdown
-markdown_content = converter.convert('input.h5')
+# Advanced: customize subsetting and sampling
+converter = HDF5Converter(
+    max_rows=20,           # Limit to 20 rows per dataset
+    max_cols=15,           # Limit to 15 columns per dataset
+    sampling_strategy="edges",  # Show first and last items
+    include_data_preview=True   # Include actual data values
+)
+markdown_content = converter.convert('data.h5', 'output.md')
 
-# Save to file
-with open('output.md', 'w') as f:
-    f.write(markdown_content)
+# Metadata only (no data values)
+converter = HDF5Converter(include_data_preview=False)
+markdown_content = converter.convert('data.h5', 'metadata.md')
 ```
 
 ## Output Format
 
-The generated markdown file includes:
+The generated markdown uses an AI-friendly key-value structure that includes:
 
-1. File structure with groups and datasets
-2. Dataset properties (shape, type)
-3. Group and dataset attributes
-4. Nicely formatted tables for metadata
+1. **File-level attributes** - Metadata about the HDF5 file
+2. **Group hierarchy** - Nested structure with group attributes
+3. **Dataset properties** - Shape, data type, size, compression, chunks
+4. **Dataset attributes** - Custom metadata for each dataset
+5. **Data preview** - Actual data values in key-value format (configurable)
+6. **External links** - Target file and path information
 
-Example output:
+### Sample Key-Value Markdown Output
 
 ```markdown
-# HDF5 File Structure: input.h5
+# HDF5 File Structure: example.h5
 
-## Group: data
-### Attributes:
-| Name | Value | Type |
-|------|--------|------|
-| `purpose` | `testing` | `str` |
+## Attributes
 
-### Dataset: array
-| Property | Value |
-|----------|--------|
-| Shape | `(3,)` |
-| Type | `float64` |
+- **title:** `Sample Scientific Dataset` (type: `str`)
+- **version:** `1.0` (type: `str`)
 
-#### Dataset Attributes:
-| Name | Value | Type |
-|------|--------|------|
-| `unit` | `meters` | `str` |
+## Group: /measurements
+
+### Attributes
+
+- **description:** `Experimental measurements` (type: `str`)
+
+### Dataset: temperature
+
+#### Properties
+
+- **Shape:** `(100,)`
+- **Data Type:** `float64`
+- **Size:** `100` elements
+
+**Data (Key-Value Format):**
+
+- `index_0`: `22.935992117831265`
+- `index_1`: `23.308188819527796`
+- `index_2`: `20.582239974390227`
+- `index_3`: `20.184652272470018`
+- `index_4`: `23.397532910900622`
+- *(showing 5 of 100 rows using 'first' sampling)*
+
+#### Attributes
+
+- **sensor:** `TH-100` (type: `str`)
+- **unit:** `Celsius` (type: `str`)
+
+### Dataset: correlation_matrix
+
+#### Properties
+
+- **Shape:** `(50, 20)`
+- **Data Type:** `float64`
+- **Size:** `1000` elements
+
+**Data (Key-Value Format):**
+
+- **Row 0:**
+  - `col_0`: `0.175408510335`
+  - `col_1`: `0.367993360963`
+  - `col_2`: `0.361122287567`
+- **Row 1:**
+  - `col_0`: `0.504039513844`
+  - `col_1`: `0.817406445579`
+  - `col_2`: `0.900514954273`
+- *(showing 2 of 50 rows, 3 of 20 cols using 'first' sampling)*
+
+#### Attributes
+
+- **description:** `Correlation coefficients` (type: `str`)
 ```
+
+This format is designed to be:
+- **Parseable** - Clear structure for AI to extract information
+- **Readable** - Easy for humans to understand
+- **Scalable** - Smart subsetting prevents overwhelming output from large datasets
 
 ## Requirements
 
