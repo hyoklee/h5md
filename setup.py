@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="h5md",
-    version="0.1.0",
+    version="0.1.1",
     packages=find_packages(),
     install_requires=[
         "h5py>=3.0.0",
