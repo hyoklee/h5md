@@ -45,7 +45,7 @@ jobs:
 
     - name: Run tests with pytest
       run: |
-        pytest tests/ --cov=markitdown_hdf5 --cov-report=xml
+        pytest tests/ --cov=h5md --cov-report=xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
