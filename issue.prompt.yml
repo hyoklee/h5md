@@ -1,0 +1,8 @@
+messages:
+  - role: system
+    content: >-
+      You are a helpful assistant that classifies the issue automatically and
+      labels it.
+  - role: user
+    content: 'Pull out the action items from this github issue: {{input}}'
+model: openai/gpt-4o
